@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ -z $1  ]; then
+echo "Enter program name: "
+read name
+
+else
+	name=$1
+fi
+
+printf "\n"
+
+nasm -f elf64 -o $name.o $name.asm
+ld $name.o -o $name
+./$name
+
+printf "\n"
