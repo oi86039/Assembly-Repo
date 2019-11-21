@@ -1,17 +1,27 @@
 #!/bin/bash
 
+#COMPILE SCRIPT - Omar Ilyas
+#Compile, link, and run a x86_64 asm file
+
+
+#Enter program name as either arg or input
 if [ -z $1  ]; then
 echo "Enter program name: "
 read name
-
+#If arg given, use it
 else
 	name=$1
 fi
 
 printf "\n"
 
+#Compile filename given to an object file (x64 only)
 nasm -f elf64 -o $name.o $name.asm
+
+#Link object file to UNIX linker
 ld $name.o -o $name
+
+#Execute filename given
 ./$name
 
 printf "\n"
