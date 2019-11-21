@@ -5,29 +5,49 @@ section .data					;Constant variables go here
 	prompt1 db "Enter number one: "		;db = declare bytes 18
 	prompt2 db "Enter number two: "		;Reserve bytes for chars unde label "prompt2" 18
 	prompt3 db "Enter number three: "	;20
-	printout1 db "Sum: "
-	printout2 db "Product: "
+	printout1 db "Sum: "			;5
+	printout2 db "Product: "		;9
+	space db "",10
 
 section .bss					;Reserve bytes for dynamic variables here
 	num1 resb 16				;Reserve 16 bytes for label firstName
 	num2 resb 16
 	num3 resb 16
-
+	sum resb 16
+	product resb 16
 ;------------------------------------------------Text Section----------------------------------------------
 
 section .text					;Main code goes here
 	global _start				;Indicate linker starting point
 _start:						;Starting routine
 
-	call _printPrompt1			;call jumps tolabel before returning to current point
-	call _getNum1				;jump to _getNum1, do that work, then jump back at ret
-	call _printPrompt2			;print message "Enter Number two: "
-	call _getNum2				;get the second number that the user typed
-	call _printPrompt3
-	call _getNum3
+	mov rsi, prompt1
+	mov rdx, 18
+	call _printPrompt			;call jumps tolabel before returning to current point
+	
+	mov rsi, num1
+	mov rdx, 16
+	call _getNum
+
+	mov rsi, prompt2			;jump to _getNum1, do that work, then jump back at ret
+	mov rdx, 18
+	call _printPrompt			;print message "Enter Number two: "
+	
+	mov rsi, num2
+	mov rdx, 16
+	call _getNum				;get the second number that the user typed
+	
+	mov rsi, prompt3
+	mov rdx, 20
+	call _printPrompt
+	
+	mov rsi, num3
+	mov rdx, 16
+	call _getNum
 
 	call _addNums
-	;call _multiplyNums
+	call _printSpace
+	call _multiplyNums
 
 	mov rax, 60				;sys_exit code (60)
 	mov rdi, 0				;error code report (0 = no error)
@@ -35,70 +55,70 @@ _start:						;Starting routine
 
 ;----------------------------------------------Input Section------------------------------------------------
 
-_printPrompt1:					;Print "Enter Number One: "
+_printPrompt:					;Print "Enter Number One: "
 	mov rax, 1				;sys_write
 	mov rdi, 1				;stdout (Standard output)
-	mov rsi, prompt1			;message to print
-	mov rdx, 18				;bytes reserved for message
 	syscall					;execute instructions
 	ret					;return to point called
 
-_getNum1:					;Get Num1 Input
+_getNum:					;Get Num1 Input
 	mov rax, 0				;sys_read
 	mov rdi, 0				;stdin (Standard input)
-	mov rsi, num1				;where to store input
-	mov rdx, 16				;bytes to reserve for storage
 	syscall
 	ret
 
-_printPrompt2:					;Print "Enter Number Two: "
-	mov rax, 1				;sys_write
-	mov rdi, 1				;stdout (Standard output)
-	mov rsi, prompt2			;message to print
-	mov rdx, 18				;bytes reserved for message
-	syscall					;execute instructions
-	ret					;return to point called
-
-_getNum2:					;Get Num2 Input
-	mov rax, 0				;sys_read
-	mov rdi, 0				;stdin (Standard input)
-	mov rsi, num2				;where to store input
-	mov rdx, 16				;bytes to reserve for storage
-	syscall
+_printSpace:
+	mov rsi, space
+	mov rdx, 1
+	call _printPrompt			;Print an empty new line	
 	ret
 
-_printPrompt3:					;Print "Enter Number Three: "
-	mov rax, 1				;sys_write
-	mov rdi, 1				;stdout (Standard output)
-	mov rsi, prompt3			;message to print
-	mov rdx, 20				;bytes reserved for message
-	syscall					;execute instructions
-	ret					;return to point called
-
-_getNum3:					;Get Num3 Input
-	mov rax, 0				;sys_read
-	mov rdi, 0				;stdin (Standard input)
-	mov rsi, num3				;where to store input
-	mov rdx, 16				;bytes to reserve for storage
-	syscall
-	ret
 ;------------------------------------------------Math section----------------------------------------------
 
 _addNums:
-	mov rax, num1
-	add rax, num2
-	add rax, num3
-	mov [rbp], rax
-	mov rdx, 32	
-	syscall
+	;Store numbers in memory (convert from ascii to normal nums)
+	mov rax, [num1]
+	sub rax, '0'				;adding Ascii 0 converts the number to a decimal number
+	mov rdi, [num2]	
+	sub rdi, '0'
+	mov rsi, [num3]
+	sub rsi, '0'
+	
+	;Add numbers
+	add rax, rdi
+	add rax, rsi	
+	add rax, '0'				;converts number back into ascii for printing
+	mov [sum], rax				;move address of total sum in rax to address of sum var
 
+	;Print result
 	mov rax, 1
 	mov rdi, 1
-	mov rsi, rbp
-	mov rdx, 32
+	mov rsi, sum
+	mov rdx, 16
 	syscall	
 
 	ret
 
-_multipleNums:
+_multiplyNums:
+	;Store numbers in memory (convert from ascii to normal nums)
+	mov rax, [num1]
+	sub rax, '0'				;adding Ascii 0 converts the number to a decimal number
+	mov rdi, [num2]	
+	sub rdi, '0'
+	mov rsi, [num3]
+	sub rsi, '0'
+	
+	;Multiply numbers
+	mul rdi					;Mul and Div only store values in rax
+	mul rsi					;multiply both values with what is in rax
+	add rax, '0'				;converts number back into ascii for printing
+	mov [product], rax			;move address of total sum in rax to address of sum var
+
+	;Print result
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, product
+	mov rdx, 16
+	syscall	
+
 	ret
