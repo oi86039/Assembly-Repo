@@ -121,4 +121,6 @@ _multiplyNums:
 	mov rdx, 16
 	syscall	
 
+	call _printSpace
+
 	ret
