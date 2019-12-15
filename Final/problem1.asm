@@ -10,12 +10,12 @@ section .data					;Constant variables go here
 	printout db "Sum: "			;5
 
 section .bss					;Reserve bytes for dynamic variables here
-	num1 resb 1				;Reserve 16 bytes for label firstName
-	num2 resb 1
-	num3 resb 1
-	num4 resb 1
-	num5 resb 1
-	sum resb 2
+	num1 resb 2				;Reserve 16 bytes for label firstName
+	num2 resb 2
+	num3 resb 2
+	num4 resb 2
+	num5 resb 2
+	sum resb 1
 ;------------------------------------------------Text Section----------------------------------------------
 
 section .text					;Main code goes here
@@ -88,7 +88,7 @@ _getNum:					;Get Num1 Input
 _addNums:
 	;Store numbers in memory (convert from ascii to normal nums)
 	mov rax, [num1]
-	sub rax, '0'				;adding Ascii 0 converts the number to a decimal number
+	sub rax, '0'				;subtracting Ascii 0 converts the number to a decimal number
 	mov rdi, [num2]	
 	sub rdi, '0'
 	mov rsi, [num3]
@@ -112,7 +112,7 @@ _addNums:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, sum
-	mov rdx, 16
+	mov rdx, 1
 	syscall	
 
 	ret
